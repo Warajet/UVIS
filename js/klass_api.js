@@ -18,7 +18,7 @@ var lastUpdateTimeInterval
 // Init Map
 var array_marker = [];
 
-var map = new google.maps.Map(document.getElementById('AQI_map'), {
+var map = L.map(document.getElementById('mapid'), {
     zoom: 17,
     center: {
         lat: 13.7291448,
@@ -39,7 +39,6 @@ loadAllData(true)
 
 function loadAllData(fullScreenLoading) {
     //Show spinner
-
 
     if (fullScreenLoading) {
         $.busyLoadFull("show");
@@ -120,7 +119,6 @@ function createMarker() {
         });
     }
     $.busyLoadFull("hide");
-
 }
 
 function getSensorCurrentValue() {
