@@ -47,6 +47,147 @@ L.mapbox.accessToken = my_access_token
 var mymap = L.mapbox.map('mapid').setView( [13.7291448, 100.7755224] , 10)
 .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
 
+// Adding layer controls
+L.EditControl = L.Control.extend({
+  options: {
+    position: 'topright',
+    callback: null,
+    kind: '',
+    html: ''
+  },
+
+  onAdd: function(map) {
+    var container = L.DomUtil.create('div', 'leaflet-control leaflet-bar'),
+      link = L.DomUtil.create('a', '', container);
+
+    link.href = '#';
+    link.title = 'Create a new ' + this.options.kind;
+    link.innerHTML = this.options.html;
+    L.DomEvent.on(link, 'click', L.DomEvent.stop)
+      .on(link, 'click', function() {
+        window.LAYER = this.options.callback.call(map.editTools);
+      }, this);
+
+    return container;
+  }
+});
+
+// Adding control temperature layer
+L.temperatureControl = L.EditControl.extend(
+	{
+		onAdd: function(map) {
+    var el = L.DomUtil.create('div', 'leaflet-bar temperature-control');
+
+    el.innerHTML = '<img src= "images/temperature.png" width=\"24px\" height=\"24px\">';
+
+    return el;
+  },
+
+  onRemove: function(map) {
+    // Nothing to do here
+  }
+	}
+);
+
+// L.temperatureControl = function(opts) {
+//   return new L.Control.temperatureControl(opts);
+// }
+//
+// L.temperatureControl({
+//   position: 'topright'
+// }).addTo(mymap);
+
+
+
+// Adding control wind layer
+L.windControl = L.EditControl.extend(
+	{
+		onAdd: function(map) {
+    var el = L.DomUtil.create('div', 'leaflet-bar wind-control');
+
+    el.innerHTML = '<img src= "images/wind.png"  width=\"24px\" height=\"24px\">';
+
+    return el;
+  },
+
+  onRemove: function(map) {
+    // Nothing to do here
+  }
+	}
+);
+// L.windControl = function(opts) {
+//   return new L.Control.windControl(opts);
+// }
+//
+// L.windControl({
+//   position: 'topright'
+// }).addTo(mymap);
+
+
+// Adding control rainfall layer
+L.rainfallControl = L.EditControl.extend(
+	{
+		onAdd: function(map) {
+    var el = L.DomUtil.create('div', 'leaflet-bar rainfall-control');
+
+    el.innerHTML = '<img src= "images/rainfall.png" width=\"24px\" height=\"24px\">';
+
+    return el;
+  },
+
+  onRemove: function(map) {
+    // Nothing to do here
+  }
+	}
+);
+
+// L.rainfallControl = function(opts) {
+//   return new L.Control.rainfallControl(opts);
+// }
+// L.rainfallControl({
+//   position: 'topright'
+// }).addTo(mymap);
+
+// Adding control traffic layer
+L.trafficControl =  L.EditControl.extend(
+	{
+		onAdd: function(map) {
+    var el = L.DomUtil.create('div', 'leaflet-bar traffic-control');
+
+    el.innerHTML ='<img src="images/traffic.png" width=\"24px\" height=\"24px\">';
+
+    return el;
+  },
+
+  onRemove: function(map) {
+    // Nothing to do here
+  	}
+	}
+);
+
+// L.trafficControl = function(opts) {
+//   return new L.Control.trafficControl(opts);
+// }
+//
+// L.control.trafficControl({
+//   position: 'topright'
+// }).addTo(mymap);
+
+mymap.addControl(new L.temperatureControl());
+mymap.addControl(new L.windControl());
+mymap.addControl(new L.rainfallControl());
+mymap.addControl(new L.trafficControl());
+
+
+// L.Control.Attribution.prototype.options.position = "bottomleft";
+//
+// var layers = {
+// 		Streets: L.mapbox.tileLayer('mapbox.streets'),
+// 		Outdoors: L.mapbox.tileLayer('mapbox.outdoors'),
+// 		Satellite: L.mapbox.tileLayer('mapbox.satellite')
+// };
+// layers.Streets.addTo(mymap);
+
 
 var nodesInfo = []
 var weatherData = []
@@ -104,6 +245,7 @@ function createClusterMarkers(){
 							"\n Temp: " + weather_sensor.temp +
 							 "\n Humidity:" + weather_sensor.humidity);
 
+					// You can add custom html here
 					marker.bindPopup( weather_sensor.name +
 							"<br> PM 2.5: " + weather_sensor.pm25Level + " ug/cm³" +
 							"<br> Temp: " + weather_sensor.temp + "°C" +

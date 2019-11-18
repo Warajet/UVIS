@@ -2,3 +2,20 @@ html, body, #mapid {
   width:100%;
   height: 100%;
 }
+
+.temperature-control {
+  background: #ffffff;
+  padding: 10px;
+}
+.wind-control {
+  background: #ffffff;
+  padding: 10px;
+}
+.traffic-control {
+  background: #ffffff;
+  padding: 10px;
+}
+.rainfall-control {
+  background: #ffffff;
+  padding: 10px;
+}
