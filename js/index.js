@@ -34,6 +34,32 @@ var traffic   = L.tileLayer(api_url, {
 });
 //traffic.setOpacity(0.5);
 
+// Placing icons here
+var rainfallIcon = L.icon({
+    iconUrl: 'images/rainfall_marker.png',
+
+    iconSize:     [50, 50], // size of the icon
+    iconAnchor:   [50, 50], // point of the icon which will correspond to marker's location
+    popupAnchor:  [20, -30] // point from which the popup should open relative to the iconAnchor
+});
+
+var temperatureIcon = L.icon({
+    iconUrl: 'images/temperature.png',
+
+    iconSize:     [50, 50], // size of the icon
+    iconAnchor:   [50, 50], // point of the icon which will correspond to marker's location
+    popupAnchor:  [20, -30] // point from which the popup should open relative to the iconAnchor
+});
+
+var windIcon = L.icon({
+    iconUrl: 'images/wind.png',
+
+    iconSize:     [50, 50], // size of the icon
+    iconAnchor:   [50, 50], // point of the icon which will correspond to marker's location
+    popupAnchor:  [20, -30] // point from which the popup should open relative to the iconAnchor
+});
+
+
 var baseMaps = {
 	"Satellite": satellite,
 	"Streets": streets,
@@ -85,6 +111,7 @@ L.temperatureControl = L.EditControl.extend(
 
   onRemove: function(map) {
     // Nothing to do here
+		 L.DomEvent.off('div', )
   }
 	}
 );
@@ -115,14 +142,6 @@ L.windControl = L.EditControl.extend(
   }
 	}
 );
-// L.windControl = function(opts) {
-//   return new L.Control.windControl(opts);
-// }
-//
-// L.windControl({
-//   position: 'topright'
-// }).addTo(mymap);
-
 
 // Adding control rainfall layer
 L.rainfallControl = L.EditControl.extend(
@@ -134,19 +153,12 @@ L.rainfallControl = L.EditControl.extend(
 
     return el;
   },
-
-  onRemove: function(map) {
-    // Nothing to do here
-  }
+    onRemove: function(map) {
+      // Nothing to do here
+    }
 	}
 );
 
-// L.rainfallControl = function(opts) {
-//   return new L.Control.rainfallControl(opts);
-// }
-// L.rainfallControl({
-//   position: 'topright'
-// }).addTo(mymap);
 
 // Adding control traffic layer
 L.trafficControl =  L.EditControl.extend(
@@ -164,14 +176,6 @@ L.trafficControl =  L.EditControl.extend(
   	}
 	}
 );
-
-// L.trafficControl = function(opts) {
-//   return new L.Control.trafficControl(opts);
-// }
-//
-// L.control.trafficControl({
-//   position: 'topright'
-// }).addTo(mymap);
 
 mymap.addControl(new L.temperatureControl());
 mymap.addControl(new L.windControl());
@@ -208,7 +212,6 @@ function getAQIInfo()
 	});
 }
 
-
 function getNodeInfo() {
 		console.log("nodesInfo is called");
     // Get data from server and store in 'array_marker'
@@ -231,6 +234,7 @@ function createClusterMarkers(){
 			var title = node_point.name
 			console.log(node_point.name+ " "+node_point.latitude + " "+ node_point.longitude);
 			var marker =  L.marker(new L.LatLng(node_point.latitude, node_point.longitude),{
+				icon: rainfallIcon,
 				title:title
 			});
 
@@ -264,42 +268,49 @@ function createClusterMarkers(){
 		mymap.addLayer(markers);
 }
 
+
+tmdWeatherData = []
+function getTMDAQIInfo()
+{
+  console.log("AQI info is called");
+	$.getJSON("http://data.tmd.go.th/api/thailandMonthlyRainfall/v1/?uid=api&ukey=api12345&format=json&year=2019"
+  , function(data){
+		tmdWeatherData = data
+		tmdWeatherData.forEach(function (e) {
+						console.log( e.StationMonthlyRainfall.StationNameEnglish
+              + "\n Lat: " + e.StationMonthlyRainfall.Latitude
+            +"\n Long: " + e.StationMonthlyRainfall.Longitude
+            +"\n Rainfall: " + e.StationMonthlyRainfall.MonthlyRainfall.RainfallTOTAL);
+					//"\n Temp: " + e.temp + "\n Humidity:" + e.humidity );
+		});
+		//createClusterMarkers();
+	});
+}
+
 getNodeInfo();
+getTMDAQIInfo();
 
-// function getTMDAPIinfo()
-// {
-// 	console.log("Get data from TMD API");
-// 	$.getJSON("http://data.tmd.go.th/api/WeatherToday/V1/?type=json", function(data)
-// 	{
-// 		weather_data = JSON.parse(data)
-// 		weather_data.forEach(function (e)
-// 		{
-// 			console.log("Lat: " + e.Stations + " Lon: " + e.Stations);
-// 		});
-// 		//createTMDMarkers()
-// 	});
-// }
-// getTMDAPIinfo()
 
-// function createTMDMarkers()
-// {
-// 	var markers = L.markerClusterGroup();
-// 	for(var i  = 0; i < weather_data.length; i++)
-// 	{
-// 		// Add the data to weather_data
-// 	}
-// }
+var mcg = L.markerClusterGroup({
+      maxClusterRadius: 50,
+      iconCreateFunction: function (cluster) {
+          var val = 0,
+              childMarkers = cluster
+              .getAllChildMarkers(),
+              total = childMarkers.length;
 
-//Import the data addressPoints from some external data
-// From: https://www.mapbox.com/mapbox.js/assets/data/realworld.388.js
-// for (var i = 0; i < addressPoints.length; i++) {
-//     var a = addressPoints[i];
-//     var title = a[2];
-//     var marker = L.marker(new L.LatLng(a[0], a[1]), {
-// 			title: title });
-//     marker.bindPopup(title);
-//     markers.addLayer(marker);
-// }
+          for (i = 0; i < total; i++) {
+              val = val + parseFloat(childMarkers[i].options.title);
+          }
+          var avg = val / total;
+          avg = Math.round(avg * 10) / 10;
+
+          return new L.divIcon({
+              html: '<div><span style="line-height: 30px;">' + avg + '</span></div>',
+              className: clusterColor(avg)
+          })
+    }
+});
 
 //
 // L.control.layers(baseMaps, customMap).addTo(mymap);
@@ -329,11 +340,11 @@ var popup = L.popup()
 	.setContent("I am a standalone popup.")
 	.openOn(mymap);
 
-  function onMapClick(e) {
-	alert("You clicked the map at " + e.latlng);
+function onMapClick(e) {
+	   alert("You clicked the map at " + e.latlng);
 }
 
-mymap.on('click', onMapClick);
+// mymap.on('click', onMapClick);
 
 var popup = L.popup();
 
@@ -344,7 +355,7 @@ function onMapClick(e) {
 		.openOn(mymap);
 }
 
-mymap.on('click', onMapClick);
+// mymap.on('click', onMapClick);
 
 //Stack geoJSON layer on top of the map
 var geojsonFeature = {"type":"Feature","properties":{"prov_code":"11","title":"à¸ªà¸¡à¸¸à¸—à¸£à¸›à¸£à¸²à¸à¸²à¸£"},"geometry":{"type":"Polygon","coordinates":[[[100.856,13.7],[100.955,13.663],[100.963,13.642],[100.907,13.592],[100.915,13.571],[100.905,13.555],[100.89,13.565],[100.872,13.49],[100.848,13.478],[100.693,13.505],[100.591,13.543],[100.561,13.507],[100.458,13.487],[100.452,13.602],[100.496,13.588],[100.521,13.605],[100.517,13.673],[100.546,13.671],[100.553,13.705],[100.585,13.696],[100.579,13.668],[100.648,13.652],[100.661,13.672],[100.693,13.651],[100.71,13.718],[100.856,13.7]]]}}
