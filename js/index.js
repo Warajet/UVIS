@@ -13,17 +13,17 @@ var satellite = L.tileLayer(api_url, {
 var streets   = L.tileLayer(api_url, {
 	attribution: mapbox_attribution,
 	maxZoom: 18,
-	id: 'mapbox.streets',
+	id: 'mapbox://styles/mapbox/streets-v11',
 	accessToken: my_access_token
 });
 
-var traffic   = L.tileLayer(api_url, {
-	attribution: mapbox_attribution,
-	maxZoom: 18,
-	id: 'mapbox.mapbox-traffic-v1',
-	type:"vector",
-	accessToken: my_access_token
-});
+// var traffic   = L.tileLayer(api_url, {
+// 	attribution: mapbox_attribution,
+// 	maxZoom: 18,
+// 	id: 'mapbox.mapbox-traffic-v1',
+// 	type:"vector",
+// 	accessToken: my_access_token
+// });
 //traffic.setOpacity(0.5);
 
 var baseMaps = {
@@ -31,16 +31,15 @@ var baseMaps = {
 	"Streets": streets,
 };
 
-var customMap={
-	"Traffic": traffic
-}
+// var customMap={
+// 	"Traffic": traffic
+// }
 
 L.mapbox.accessToken = my_access_token
 var mymap = L.map('mapid').setView( [13.7291448, 100.7755224] , 10)
 .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'));
 
-var layerControl = L.control.layers(null, null).addTo(mymap);
-
+var layerControl = L.control.layers(baseMaps, null).addTo(mymap);
 
 var nodesInfo = []
 var weatherData = []
@@ -86,6 +85,13 @@ $.getJSON("https://flexibleiotplatquery.azurewebsites.net/api/v1", function (dat
 }
 
 function create77JangwadMarker(){
+	var TMDWeatherIcon = L.icon({
+		iconUrl: 'images/weather_station.png',
+
+		iconSize:     [38, 50], // size of the icon
+		iconAnchor:   [0, 0], // point of the icon which will correspond to marker's location
+		//popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+});
 	var markers2 = L.markerClusterGroup();
 	var tempMarkerForLayer = [];
 	for (var i = 0; i < jangwad.length; i++)
@@ -93,7 +99,7 @@ function create77JangwadMarker(){
 		var jangwad_point = jangwad[i];
 		var title = jangwad_point.node
 		var marker2 =  L.marker(new L.LatLng(jangwad_point.geometry.coordinates[0], jangwad_point.geometry.coordinates[1]),{
-			title:title
+			title:title, icon:TMDWeatherIcon
 		});
 		marker2.bindPopup("<bigtext>" + jangwad_point.node + "</bigtext>" +
 						"<br><br><img src='images/thermometer.png' width='50px' height='50px'> <b>Temperature:</b> " + jangwad_point.data.temperature + "°C" +
@@ -111,6 +117,14 @@ function create77JangwadMarker(){
 }
 
 function createClusterMarkers(){
+		var KLASSIcon = L.icon({
+	    iconUrl: 'images/KLASS.png',
+
+	    iconSize:     [38, 50], // size of the icon
+	    iconAnchor:   [0, 0], // point of the icon which will correspond to marker's location
+	    //popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+	});
+
 		// Create the markerClusterGroup here
 		var markers = L.markerClusterGroup();
 		var tempMarkerForLayer = [];
@@ -120,7 +134,7 @@ function createClusterMarkers(){
 			var title = node_point.name
 			//console.log(node_point.name+ " "+node_point.latitude + " "+ node_point.longitude);
 			var marker =  L.marker(new L.LatLng(node_point.latitude, node_point.longitude),{
-				title:title
+				title:title, icon: KLASSIcon
 			});
 
 			for(var j = 0; j < weatherData.length;j++)
@@ -153,21 +167,21 @@ getJangwad();
 
 
 
-var marker = L.marker([13, 100]).addTo(mymap).on('click', onClick);
-function onClick(e) {
-    Swal.fire({
-		title: 'Bangkok',
-		html:
-			"<br><br><img src='images/thermometer.png' width='50px' height='50px'> <b>Temperature:</b> 50°C" +
-			"<br><img src='images/humidity.png' width='50px' height='50px'> <b>Relative Humidity:</b> 3%" +
-			"<br><img src='images/gauge.png' width='50px' height='50px'> <b>Sea Level Pressure:</b> 2011 mbar" +
-			"<br><img src='images/breeze.png' width='50px' height='50px'> <b>Wind Speed:</b> 8 km/h" +
-			"<br><img src='images/rain.png' width='50px' height='50px'> <b>Rainfall:</b> 9 mm",
-		icon: 'info',
-		confirmButtonText: 'Close',
-		timer: 3000,
-	})
-}
+// var marker = L.marker([13, 100]).addTo(mymap).on('click', onClick);
+// function onClick(e) {
+//     Swal.fire({
+// 		title: 'Bangkok',
+// 		html:
+// 			"<br><br><img src='images/thermometer.png' width='50px' height='50px'> <b>Temperature:</b> 50°C" +
+// 			"<br><img src='images/humidity.png' width='50px' height='50px'> <b>Relative Humidity:</b> 3%" +
+// 			"<br><img src='images/gauge.png' width='50px' height='50px'> <b>Sea Level Pressure:</b> 2011 mbar" +
+// 			"<br><img src='images/breeze.png' width='50px' height='50px'> <b>Wind Speed:</b> 8 km/h" +
+// 			"<br><img src='images/rain.png' width='50px' height='50px'> <b>Rainfall:</b> 9 mm",
+// 		icon: 'info',
+// 		confirmButtonText: 'Close',
+// 		timer: 3000,
+// 	})
+// }
 
   function onMapClick(e) {
 	alert("You clicked the map at " + e.latlng);
